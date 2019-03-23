@@ -1,28 +1,63 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { Stopwatch } from "ts-stopwatch";
+import { Timer } from "./components/timer";
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+type AppState = {
+  elapsedTime: number;
+};
+
+class App extends Component<{}, AppState> {
+  private stopwatch = new Stopwatch();
+  private interval: NodeJS.Timeout;
+
+  constructor({}) {
+    super({});
+    this.state = {
+      elapsedTime: this.stopwatch.getTime()
+    };
+    this.interval = setInterval(
+      () => this.setState({ elapsedTime: this.stopwatch.getTime() }),
+      1
     );
   }
+
+  componentWillMount = () => {
+    document.addEventListener("keydown", this.handleKeyDown);
+  };
+
+  render = () => {
+    return (
+      <div>
+        <Timer time={this.state.elapsedTime} />
+      </div>
+    );
+  };
+
+  componentWillUnmount = () => {
+    clearInterval(this.interval);
+  };
+
+  private handleKeyDown = (event: KeyboardEvent) => {
+    if (event.keyCode === 32) {
+      this.start();
+    }
+  };
+
+  private start = () => {
+    this.stopwatch.start();
+  };
+
+  private stop = () => {
+    this.stopwatch.stop();
+  };
+
+  private reset = () => {
+    this.stopwatch.reset();
+  };
+
+  private unsplit = () => {
+    // TODO Le Unsplit
+  };
 }
 
 export default App;
