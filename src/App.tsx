@@ -1,24 +1,30 @@
 import React, { Component } from "react";
+
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
+import { TimerState } from "./models/timerState";
+
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+
+import "./styles/contextMenu.css";
 
 type AppState = {
   elapsedTime: number;
+  state: TimerState;
 };
 
 class App extends Component<{}, AppState> {
   private stopwatch = new Stopwatch();
   private interval: NodeJS.Timeout;
 
-  constructor({}) {
-    super({});
+  constructor(props: {}) {
+    super(props);
     this.state = {
-      elapsedTime: this.stopwatch.getTime()
+      elapsedTime: this.stopwatch.getTime(),
+      state: TimerState.STOPPED
     };
-    this.interval = setInterval(
-      () => this.setState({ elapsedTime: this.stopwatch.getTime() }),
-      1
-    );
+    this.intervalHandler = this.intervalHandler.bind(this);
+    this.interval = setInterval(this.intervalHandler, 1);
   }
 
   componentWillMount = () => {
@@ -28,13 +34,22 @@ class App extends Component<{}, AppState> {
   render = () => {
     return (
       <div>
-        <Timer time={this.state.elapsedTime} />
+        <ContextMenuTrigger id="timer-context-menu">
+          <Timer time={this.state.elapsedTime} />
+        </ContextMenuTrigger>
+
+        <ContextMenu id="timer-context-menu">
+          <MenuItem data={{ foo: "test" }} onClick={this.start}>
+            Create New Splits
+          </MenuItem>
+        </ContextMenu>
       </div>
     );
   };
 
   componentWillUnmount = () => {
     clearInterval(this.interval);
+    document.removeEventListener("keydown", this.handleKeyDown);
   };
 
   private handleKeyDown = (event: KeyboardEvent) => {
@@ -43,8 +58,15 @@ class App extends Component<{}, AppState> {
     }
   };
 
+  private intervalHandler = () => {
+    if (this.state.state === TimerState.RUNNING) {
+      this.setState({ elapsedTime: this.stopwatch.getTime() });
+    }
+  };
+
   private start = () => {
     this.stopwatch.start();
+    this.setState({ state: TimerState.RUNNING });
   };
 
   private stop = () => {
