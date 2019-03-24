@@ -1,5 +1,6 @@
 form {
   margin: 10px;
+  width: 400px;
 }
 
 form .form-input label {
@@ -20,6 +21,8 @@ form .segments-grid .segments-grid-segments {
   max-height: 300px;
   width: 400px;
   overflow-y: auto;
+
+  margin-bottom: 5px;
 }
 
 form .segments-grid .segments-grid-header .segment-grid-header-title {

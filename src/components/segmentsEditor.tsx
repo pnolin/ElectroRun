@@ -39,6 +39,7 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             id="segment-name"
             name="segment-name"
             value={segment.name}
+            onChange={this.handleSegmentNameChange(index)}
           />
           <input
             type="number"
@@ -64,6 +65,7 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             id="game-name"
             name="game-name"
             value={this.state.gameName}
+            onChange={this.handleGameNameChange}
           />
         </div>
         <div className="form-input">
@@ -73,6 +75,7 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             id="run-category"
             name="run-category"
             value={this.state.runCategory}
+            onChange={this.handleRunCategoryChange}
           />
         </div>
         <div className="segments-grid">
@@ -85,6 +88,28 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
         </div>
       </form>
     );
+  };
+
+  private handleGameNameChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    this.setState({ gameName: event.target.value });
+  };
+
+  private handleRunCategoryChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    this.setState({ runCategory: event.target.value });
+  };
+
+  private handleSegmentNameChange = (index: number) => {
+    return (event: React.ChangeEvent<HTMLInputElement>) => {
+      const segments = this.state.segments.map(segment =>
+        Object.assign({}, segment)
+      );
+      segments[index].name = event.target.value;
+      this.setState({ segments });
+    };
   };
 
   private addSegment = (
