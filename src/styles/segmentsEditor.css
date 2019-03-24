@@ -1,0 +1,27 @@
+form {
+  margin: 10px;
+}
+
+form .form-input label {
+  margin-bottom: 10px;
+}
+
+form .form-input label {
+  display: inline-block;
+  width: 130px;
+}
+
+form .segments-grid .segments-grid-header {
+  display: flex;
+  flex-direction: row;
+}
+
+form .segments-grid .segments-grid-header .segment-grid-header-title {
+  width: 174px;
+  margin-left: 5px;
+  margin-bottom: 5px;
+}
+
+form .segments-grid input {
+  margin-right: 5px;
+}
