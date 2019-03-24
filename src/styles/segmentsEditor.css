@@ -16,6 +16,12 @@ form .segments-grid .segments-grid-header {
   flex-direction: row;
 }
 
+form .segments-grid .segments-grid-segments {
+  max-height: 300px;
+  width: 400px;
+  overflow-y: auto;
+}
+
 form .segments-grid .segments-grid-header .segment-grid-header-title {
   width: 174px;
   margin-left: 5px;
@@ -24,4 +30,8 @@ form .segments-grid .segments-grid-header .segment-grid-header-title {
 
 form .segments-grid input {
   margin-right: 5px;
+}
+
+.fa-times {
+  color: red;
 }

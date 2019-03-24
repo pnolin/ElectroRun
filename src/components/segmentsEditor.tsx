@@ -2,6 +2,12 @@ import React from "react";
 
 import { Segment } from "../models/segment";
 
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faTimes);
+
 import "../styles/segmentsEditor.css";
 
 type SegmentsEditorState = {
@@ -40,6 +46,11 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             name="segment-split-time"
             value={segment.splitTime}
           />
+          {index > 0 && (
+            <span onClick={this.deleteSegment(index)}>
+              <FontAwesomeIcon icon="times" />
+            </span>
+          )}
         </div>
       );
     });
@@ -69,9 +80,26 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             <div className="segment-grid-header-title">Segment Name</div>
             <div className="segment-grid-header-title">Split Time</div>
           </div>
-          {segments}
+          <div className="segments-grid-segments">{segments}</div>
+          <button onClick={this.addSegment}>Add Segment</button>
         </div>
       </form>
     );
+  };
+
+  private addSegment = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    event.preventDefault();
+    this.setState({ segments: this.state.segments.concat(new Segment()) });
+  };
+
+  private deleteSegment = (index: number) => {
+    return (_: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      const segments = this.state.segments.filter(
+        (_, stateIndex) => stateIndex !== index
+      );
+      this.setState({ segments });
+    };
   };
 }
