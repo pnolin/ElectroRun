@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Segment } from "../models/segment";
+import { elapsedTimeToString, stringToElapsedTime } from "../utils/timeFormat";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -42,10 +43,10 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
             onChange={this.handleSegmentNameChange(index)}
           />
           <input
-            type="number"
+            type="text"
             id="segment-split-time"
             name="segment-split-time"
-            value={segment.splitTime}
+            onChange={this.handleSegmentSplitTimeChange(index)}
           />
           {index > 0 && (
             <span onClick={this.deleteSegment(index)}>
@@ -108,6 +109,16 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
         Object.assign({}, segment)
       );
       segments[index].name = event.target.value;
+      this.setState({ segments });
+    };
+  };
+
+  private handleSegmentSplitTimeChange = (index: number) => {
+    return (event: React.ChangeEvent<HTMLInputElement>) => {
+      const segments = this.state.segments.map(segment =>
+        Object.assign({}, segment)
+      );
+      segments[index].splitTime = stringToElapsedTime(event.target.value);
       this.setState({ segments });
     };
   };
