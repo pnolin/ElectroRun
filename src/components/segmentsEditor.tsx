@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Segment } from "../models/segment";
+import { Run } from "../models/run";
 import { elapsedTimeToString, stringToElapsedTime } from "../utils/timeFormat";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -11,14 +12,22 @@ library.add(faTimes);
 
 import "../styles/segmentsEditor.css";
 
+type SegmentsEditorProps = {
+  onSave: (run: Run) => void;
+  onCancel: () => void;
+};
+
 type SegmentsEditorState = {
   gameName: string;
   runCategory: string;
   segments: Segment[];
 };
 
-export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
-  constructor(props: {}) {
+export class SegmentsEditor extends React.Component<
+  SegmentsEditorProps,
+  SegmentsEditorState
+> {
+  constructor(props: SegmentsEditorProps) {
     super(props);
 
     const segments = new Array<Segment>();
@@ -87,6 +96,10 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
           <div className="segments-grid-segments">{segments}</div>
           <button onClick={this.addSegment}>Add Segment</button>
         </div>
+        <div className="segments-editor-buttons">
+          <button onClick={this.save}>Save</button>
+          <button onClick={this.cancel}>Cancel</button>
+        </div>
       </form>
     );
   };
@@ -137,5 +150,21 @@ export class SegmentsEditor extends React.Component<{}, SegmentsEditorState> {
       );
       this.setState({ segments });
     };
+  };
+
+  private save = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+    const run = new Run();
+    run.gameName = this.state.gameName;
+    run.runCategory = this.state.runCategory;
+    run.segments = this.state.segments.map(segment =>
+      Object.assign({}, segment)
+    );
+    this.props.onSave(run);
+  };
+
+  private cancel = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+    this.props.onCancel();
   };
 }

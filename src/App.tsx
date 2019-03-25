@@ -4,6 +4,7 @@ import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
 import { SegmentsEditor } from "./components/segmentsEditor";
 import { TimerState } from "./models/timerState";
+import { Run } from "./models/run";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Popup from "reactjs-popup";
@@ -14,6 +15,7 @@ type AppState = {
   elapsedTime: number;
   state: TimerState;
   segmentsEditorOpen: boolean;
+  run?: Run;
 };
 
 class App extends Component<{}, AppState> {
@@ -48,8 +50,14 @@ class App extends Component<{}, AppState> {
           </MenuItem>
         </ContextMenu>
 
-        <Popup position="right center" open={this.state.segmentsEditorOpen}>
-          <SegmentsEditor />
+        <Popup
+          open={this.state.segmentsEditorOpen}
+          closeOnDocumentClick={false}
+        >
+          <SegmentsEditor
+            onSave={this.onSegmentsEditorSave}
+            onCancel={this.onSegmentsEditorCancel}
+          />
         </Popup>
       </div>
     );
@@ -79,6 +87,14 @@ class App extends Component<{}, AppState> {
 
   private openSegmentsEditor = () => {
     this.setState({ segmentsEditorOpen: true });
+  };
+
+  private onSegmentsEditorSave = (run: Run) => {
+    this.setState({ run, segmentsEditorOpen: false });
+  };
+
+  private onSegmentsEditorCancel = () => {
+    this.setState({ segmentsEditorOpen: false });
   };
 }
 

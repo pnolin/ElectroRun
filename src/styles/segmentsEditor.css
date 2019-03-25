@@ -12,6 +12,10 @@ form .form-input label {
   width: 130px;
 }
 
+form .segments-grid {
+  margin-bottom: 10px;
+}
+
 form .segments-grid .segments-grid-header {
   display: flex;
   flex-direction: row;
@@ -31,7 +35,8 @@ form .segments-grid .segments-grid-header .segment-grid-header-title {
   margin-bottom: 5px;
 }
 
-form .segments-grid input {
+form .segments-grid input,
+form .segments-editor-buttons > button:first-child {
   margin-right: 5px;
 }
 
