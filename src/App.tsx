@@ -1,24 +1,36 @@
 import React, { Component } from "react";
+
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
+import { SegmentsEditor } from "./components/segmentsEditor";
+import { TimerState } from "./models/timerState";
+import { Run } from "./models/run";
+
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import Popup from "reactjs-popup";
+
+import "./styles/contextMenu.css";
 
 type AppState = {
   elapsedTime: number;
+  state: TimerState;
+  segmentsEditorOpen: boolean;
+  run?: Run;
 };
 
 class App extends Component<{}, AppState> {
   private stopwatch = new Stopwatch();
   private interval: NodeJS.Timeout;
 
-  constructor({}) {
-    super({});
+  constructor(props: {}) {
+    super(props);
     this.state = {
-      elapsedTime: this.stopwatch.getTime()
+      elapsedTime: this.stopwatch.getTime(),
+      state: TimerState.STOPPED,
+      segmentsEditorOpen: false
     };
-    this.interval = setInterval(
-      () => this.setState({ elapsedTime: this.stopwatch.getTime() }),
-      1
-    );
+    this.intervalHandler = this.intervalHandler.bind(this);
+    this.interval = setInterval(this.intervalHandler, 1);
   }
 
   componentWillMount = () => {
@@ -28,13 +40,32 @@ class App extends Component<{}, AppState> {
   render = () => {
     return (
       <div>
-        <Timer time={this.state.elapsedTime} />
+        <ContextMenuTrigger id="timer-context-menu">
+          <Timer time={this.state.elapsedTime} />
+        </ContextMenuTrigger>
+
+        <ContextMenu id="timer-context-menu">
+          <MenuItem data={{ foo: "test" }} onClick={this.openSegmentsEditor}>
+            Create New Splits
+          </MenuItem>
+        </ContextMenu>
+
+        <Popup
+          open={this.state.segmentsEditorOpen}
+          closeOnDocumentClick={false}
+        >
+          <SegmentsEditor
+            onSave={this.onSegmentsEditorSave}
+            onCancel={this.onSegmentsEditorCancel}
+          />
+        </Popup>
       </div>
     );
   };
 
   componentWillUnmount = () => {
     clearInterval(this.interval);
+    document.removeEventListener("keydown", this.handleKeyDown);
   };
 
   private handleKeyDown = (event: KeyboardEvent) => {
@@ -43,20 +74,27 @@ class App extends Component<{}, AppState> {
     }
   };
 
+  private intervalHandler = () => {
+    if (this.state.state === TimerState.RUNNING) {
+      this.setState({ elapsedTime: this.stopwatch.getTime() });
+    }
+  };
+
   private start = () => {
     this.stopwatch.start();
+    this.setState({ state: TimerState.RUNNING });
   };
 
-  private stop = () => {
-    this.stopwatch.stop();
+  private openSegmentsEditor = () => {
+    this.setState({ segmentsEditorOpen: true });
   };
 
-  private reset = () => {
-    this.stopwatch.reset();
+  private onSegmentsEditorSave = (run: Run) => {
+    this.setState({ run, segmentsEditorOpen: false });
   };
 
-  private unsplit = () => {
-    // TODO Le Unsplit
+  private onSegmentsEditorCancel = () => {
+    this.setState({ segmentsEditorOpen: false });
   };
 }
 

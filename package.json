@@ -5,13 +5,18 @@
   "main": "electron-starter.js",
   "homepage": "./",
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.17",
+    "@fortawesome/free-solid-svg-icons": "^5.8.1",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "@types/jest": "24.0.11",
     "@types/node": "11.11.4",
     "@types/react": "16.8.8",
     "@types/react-dom": "16.8.3",
     "react": "^16.8.4",
+    "react-contextmenu": "^2.11.0",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8",
+    "reactjs-popup": "^1.3.2",
     "ts-stopwatch": "0.0.4",
     "typescript": "3.3.4000"
   },
