@@ -2,6 +2,7 @@ import React, { Component } from "react";
 
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
+import { Segments } from "./components/segments";
 import { SegmentsEditor } from "./components/segmentsEditor";
 import { TimerState } from "./models/timerState";
 import { Run } from "./models/run";
@@ -41,6 +42,7 @@ class App extends Component<{}, AppState> {
     return (
       <div>
         <ContextMenuTrigger id="timer-context-menu">
+          {this.state.run && <Segments segments={this.state.run.segments} />}
           <Timer time={this.state.elapsedTime} />
         </ContextMenuTrigger>
 
