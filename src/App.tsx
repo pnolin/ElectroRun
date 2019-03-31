@@ -9,6 +9,8 @@ import { Segments } from "./components/segments";
 import { SegmentsEditor } from "./components/segmentsEditor";
 import { TimerState } from "./models/timerState";
 import { Run } from "./models/run";
+import { Segment as SegmentModel } from "./models/segment";
+import { RunDto } from "./models/dtos/runDto";
 import { FileDialogFilter } from "./models/fileDialogFilter";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
@@ -63,6 +65,7 @@ class App extends Component<{}, AppState> {
           <MenuItem onClick={this.saveSplitsAs} disabled={!this.state.run}>
             Save Splits As
           </MenuItem>
+          <MenuItem onClick={this.loadSplits}>Load Splits</MenuItem>
         </ContextMenu>
 
         <Popup
@@ -113,16 +116,57 @@ class App extends Component<{}, AppState> {
   };
 
   private saveSplitsAs = () => {
-    const filters = new Array<FileDialogFilter>();
-    filters.push({ name: "ElectroRun Splits", extensions: ["ess"] });
+    const filters = this.getSplitsFileDialogFilters();
 
     const options = {
       title: "Save As",
       filters
     };
-    dialog.showSaveDialog(null, options, (filename: string) => {
-      fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+    dialog.showSaveDialog(null, options, (filename?: string) => {
+      if (filename) {
+        fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+      }
     });
+  };
+
+  private loadSplits = () => {
+    const filters = this.getSplitsFileDialogFilters();
+
+    const options = {
+      filters
+    };
+
+    dialog.showOpenDialog(null, options, (filePaths?: string[]) => {
+      if (filePaths) {
+        const filename = filePaths[0];
+        const fileContent = fs.readFileSync(filename);
+        this.setState({ run: this.parseRunFromFile(fileContent) });
+      }
+    });
+  };
+
+  private getSplitsFileDialogFilters = () => {
+    const filters = new Array<FileDialogFilter>();
+    filters.push({ name: "ElectroRun Splits", extensions: ["ess"] });
+
+    return filters;
+  };
+
+  private parseRunFromFile = (fileContent: string) => {
+    const run = new Run();
+    const parsedContent = JSON.parse(fileContent) as RunDto;
+
+    run.gameName = parsedContent.gameName!;
+    run.runCategory = parsedContent.runCategory!;
+    run.segments = parsedContent.segments!.map(segmentDto => {
+      const segment = new SegmentModel();
+      segment.name = segmentDto.name!;
+      segment.splitTime = segmentDto.splitTime;
+
+      return segment;
+    });
+
+    return run;
   };
 }
 
