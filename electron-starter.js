@@ -19,8 +19,6 @@ function createWindow() {
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 300,
-    height: 70,
     frame: false,
     transparent: true
   });
