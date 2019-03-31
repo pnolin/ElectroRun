@@ -1,0 +1,11 @@
+.segment {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  background-color: black;
+  color: grey;
+
+  height: 30px;
+  padding: 0px 5px;
+}
