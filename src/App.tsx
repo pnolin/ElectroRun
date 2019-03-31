@@ -1,7 +1,8 @@
+const mainWindow = window.require("electron").remote.getCurrentWindow();
 const { dialog } = window.require("electron").remote;
 const fs = window.require("fs");
 
-import React, { Component, createRef, RefObject } from "react";
+import React, { Component } from "react";
 
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
@@ -34,6 +35,9 @@ type AppState = {
 };
 
 class App extends Component<{}, AppState> {
+  private dragging = false;
+  private mouseX = 0;
+  private mouseY = 0;
   private stopwatch = new Stopwatch();
   private interval: NodeJS.Timeout;
 
@@ -54,8 +58,14 @@ class App extends Component<{}, AppState> {
 
   render = () => {
     return (
-      <div>
-        <ContextMenuTrigger id="timer-context-menu">
+      <div
+        id="electro-run"
+        onMouseDownCapture={this.handleMouseDown}
+        onMouseMoveCapture={this.handleMouseMove}
+        onMouseUpCapture={this.handleMouseUp}
+        onMouseLeave={this.handleMouseUp}
+      >
+        <ContextMenuTrigger id="timer-context-menu" holdToDisplay={-1}>
           {this.state.run && (
             <Title
               gameName={this.state.run.gameName}
@@ -95,6 +105,37 @@ class App extends Component<{}, AppState> {
   componentWillUnmount = () => {
     clearInterval(this.interval);
     document.removeEventListener("keydown", this.handleKeyDown);
+  };
+
+  private handleMouseDown = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (event.button === 0) {
+      this.dragging = true;
+      this.mouseX = event.pageX;
+      this.mouseY = event.pageY;
+    }
+  };
+
+  private handleMouseMove = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    event.preventDefault();
+    if (event.button === 0 && this.dragging) {
+      var xLocation = event.screenX - this.mouseX;
+      var yLocation = event.screenY - this.mouseY;
+
+      mainWindow.setPosition(xLocation, yLocation);
+    }
+  };
+
+  private handleMouseUp = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (event.button === 0) {
+      this.dragging = false;
+    }
   };
 
   private handleKeyDown = (event: KeyboardEvent) => {
