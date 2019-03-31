@@ -1,4 +1,5 @@
 const { dialog } = window.require("electron").remote;
+const fs = window.require("fs");
 
 import React, { Component, createRef, RefObject } from "react";
 
@@ -119,7 +120,9 @@ class App extends Component<{}, AppState> {
       title: "Save As",
       filters
     };
-    dialog.showSaveDialog(null, options);
+    dialog.showSaveDialog(null, options, (filename: string) => {
+      fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+    });
   };
 }
 
