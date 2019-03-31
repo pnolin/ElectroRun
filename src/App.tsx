@@ -1,4 +1,7 @@
-import React, { Component } from "react";
+const { dialog } = window.require("electron").remote;
+const fs = window.require("fs");
+
+import React, { Component, createRef, RefObject } from "react";
 
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
@@ -6,11 +9,18 @@ import { Segments } from "./components/segments";
 import { SegmentsEditor } from "./components/segmentsEditor";
 import { TimerState } from "./models/timerState";
 import { Run } from "./models/run";
+import { FileDialogFilter } from "./models/fileDialogFilter";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Popup from "reactjs-popup";
 
 import "./styles/contextMenu.css";
+
+declare global {
+  interface Window {
+    require: (id: string) => any;
+  }
+}
 
 type AppState = {
   elapsedTime: number;
@@ -47,8 +57,11 @@ class App extends Component<{}, AppState> {
         </ContextMenuTrigger>
 
         <ContextMenu id="timer-context-menu">
-          <MenuItem data={{ foo: "test" }} onClick={this.openSegmentsEditor}>
+          <MenuItem onClick={this.openSegmentsEditor}>
             Create New Splits
+          </MenuItem>
+          <MenuItem onClick={this.saveSplitsAs} disabled={!this.state.run}>
+            Save Splits As
           </MenuItem>
         </ContextMenu>
 
@@ -97,6 +110,19 @@ class App extends Component<{}, AppState> {
 
   private onSegmentsEditorCancel = () => {
     this.setState({ segmentsEditorOpen: false });
+  };
+
+  private saveSplitsAs = () => {
+    const filters = new Array<FileDialogFilter>();
+    filters.push({ name: "ElectroRun Splits", extensions: ["ess"] });
+
+    const options = {
+      title: "Save As",
+      filters
+    };
+    dialog.showSaveDialog(null, options, (filename: string) => {
+      fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+    });
   };
 }
 
