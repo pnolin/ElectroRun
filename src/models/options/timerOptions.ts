@@ -1,7 +1,7 @@
-export class TimerOptions {
-  public height: number;
+import { BaseOptions } from "./baseOptions";
 
+export class TimerOptions extends BaseOptions {
   constructor(height: number) {
-    this.height = height;
+    super(height);
   }
 }

@@ -11,7 +11,10 @@ type TimerProps = {
 };
 
 export const Timer = (props: TimerProps) => {
-  const style = { height: props.options.height };
+  const style = {
+    height: props.options.height,
+    color: props.options.textColor
+  };
   return (
     <div id="timer" style={style}>
       {elapsedTimeToString(props.time)}

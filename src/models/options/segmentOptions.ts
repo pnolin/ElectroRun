@@ -1,7 +1,7 @@
-export class SegmentOptions {
-  public height: number;
+import { BaseOptions } from "./baseOptions";
 
+export class SegmentOptions extends BaseOptions {
   constructor(height: number) {
-    this.height = height;
+    super(height);
   }
 }

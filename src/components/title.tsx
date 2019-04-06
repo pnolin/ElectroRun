@@ -11,7 +11,10 @@ type TitleProps = {
 };
 
 export const Title = (props: TitleProps) => {
-  const style = { height: props.options.height };
+  const style = {
+    height: props.options.height,
+    color: props.options.textColor
+  };
 
   return (
     <div id="title" style={style}>

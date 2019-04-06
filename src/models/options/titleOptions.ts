@@ -1,7 +1,7 @@
-export class TitleOptions {
-  public height: number;
+import { BaseOptions } from "./baseOptions";
 
+export class TitleOptions extends BaseOptions {
   constructor(height: number) {
-    this.height = height;
+    super(height);
   }
 }

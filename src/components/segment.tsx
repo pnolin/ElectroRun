@@ -10,7 +10,10 @@ type SegmentProps = {
 };
 
 const Segment = (props: SegmentProps) => {
-  const style = { height: props.options.height };
+  const style = {
+    height: props.options.height,
+    color: props.options.textColor
+  };
   return (
     <div className="segment" style={style}>
       <span>{`${props.segment.name}`}</span>
