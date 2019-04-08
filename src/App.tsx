@@ -29,6 +29,7 @@ type AppState = {
   state: TimerState;
   segmentsEditorOpen: boolean;
   run?: Run;
+  currentRunFilename?: string;
 };
 
 class App extends Component<{}, AppState> {
@@ -61,6 +62,9 @@ class App extends Component<{}, AppState> {
         <ContextMenu id="timer-context-menu">
           <MenuItem onClick={this.openSegmentsEditor}>
             Create New Splits
+          </MenuItem>
+          <MenuItem onClick={this.saveSplits} disabled={!this.state.run}>
+            Save Splits
           </MenuItem>
           <MenuItem onClick={this.saveSplitsAs} disabled={!this.state.run}>
             Save Splits As
@@ -115,6 +119,16 @@ class App extends Component<{}, AppState> {
     this.setState({ segmentsEditorOpen: false });
   };
 
+  private saveSplits = () => {
+    const filename = this.state.currentRunFilename;
+
+    if (filename) {
+      this.saveSplitsToFile(filename);
+    } else {
+      this.saveSplitsAs();
+    }
+  };
+
   private saveSplitsAs = () => {
     const filters = this.getSplitsFileDialogFilters();
 
@@ -124,9 +138,14 @@ class App extends Component<{}, AppState> {
     };
     dialog.showSaveDialog(null, options, (filename?: string) => {
       if (filename) {
-        fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+        this.saveSplitsToFile(filename);
+        this.setState({ currentRunFilename: filename });
       }
     });
+  };
+
+  private saveSplitsToFile = (filename: string) => {
+    fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
   };
 
   private loadSplits = () => {
@@ -141,6 +160,7 @@ class App extends Component<{}, AppState> {
         const filename = filePaths[0];
         const fileContent = fs.readFileSync(filename);
         this.setState({ run: this.parseRunFromFile(fileContent) });
+        this.setState({ currentRunFilename: filename });
       }
     });
   };
