@@ -2,14 +2,20 @@ import React from "react";
 
 import { Segment as SegmentModel } from "../models/segment";
 import { elapsedTimeToString } from "../utils/timeFormat";
+import { SegmentOptions } from "../models/options/segmentOptions";
 
 type SegmentProps = {
   segment: SegmentModel;
+  options: SegmentOptions;
 };
 
 const Segment = (props: SegmentProps) => {
+  const style = {
+    height: props.options.height,
+    color: props.options.textColor
+  };
   return (
-    <div className="segment">
+    <div className="segment" style={style}>
       <span>{`${props.segment.name}`}</span>
       <span>{`${
         props.segment.splitTime

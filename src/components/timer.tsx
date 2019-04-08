@@ -1,13 +1,23 @@
 import React from "react";
 
 import { elapsedTimeToString } from "../utils/timeFormat";
+import { TimerOptions } from "../models/options/timerOptions";
 
 import "../styles/timer.css";
 
 type TimerProps = {
   time: number;
+  options: TimerOptions;
 };
 
 export const Timer = (props: TimerProps) => {
-  return <div id="timer">{elapsedTimeToString(props.time)}</div>;
+  const style = {
+    height: props.options.height,
+    color: props.options.textColor
+  };
+  return (
+    <div id="timer" style={style}>
+      {elapsedTimeToString(props.time)}
+    </div>
+  );
 };

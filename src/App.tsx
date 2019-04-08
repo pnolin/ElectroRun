@@ -1,7 +1,8 @@
+const mainWindow = window.require("electron").remote.getCurrentWindow();
 const { dialog } = window.require("electron").remote;
 const fs = window.require("fs");
 
-import React, { Component, createRef, RefObject } from "react";
+import React, { Component } from "react";
 
 import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
@@ -12,6 +13,7 @@ import { TimerState } from "./models/timerState";
 import { Run } from "./models/run";
 import { Segment as SegmentModel } from "./models/segment";
 import { RunDto } from "./models/dtos/runDto";
+import { LayoutOptions } from "./models/options/layoutOptions";
 import { FileDialogFilter } from "./models/fileDialogFilter";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
@@ -30,19 +32,26 @@ type AppState = {
   state: TimerState;
   segmentsEditorOpen: boolean;
   run?: Run;
+  layoutOptions: LayoutOptions;
   currentRunFilename?: string;
 };
 
 class App extends Component<{}, AppState> {
+  private dragging = false;
+  private mouseX = 0;
+  private mouseY = 0;
   private stopwatch = new Stopwatch();
   private interval: NodeJS.Timeout;
+  private defaultWidth = 300;
+  private gapForMenu = 100;
 
   constructor(props: {}) {
     super(props);
     this.state = {
       elapsedTime: this.stopwatch.getTime(),
       state: TimerState.STOPPED,
-      segmentsEditorOpen: false
+      segmentsEditorOpen: false,
+      layoutOptions: new LayoutOptions()
     };
     this.intervalHandler = this.intervalHandler.bind(this);
     this.interval = setInterval(this.intervalHandler, 1);
@@ -52,20 +61,39 @@ class App extends Component<{}, AppState> {
     document.addEventListener("keydown", this.handleKeyDown);
   };
 
+  componentDidMount = () => {
+    mainWindow.setSize(this.defaultWidth, this.getAppHeight());
+  };
+
   render = () => {
     return (
       <div>
-        <ContextMenuTrigger id="timer-context-menu">
-          {this.state.run && (
-            <Title
-              gameName={this.state.run.gameName}
-              runCategory={this.state.run.runCategory}
+        <div
+          onMouseDownCapture={this.handleMouseDown}
+          onMouseMoveCapture={this.handleMouseMove}
+          onMouseUpCapture={this.handleMouseUp}
+          onMouseLeave={this.handleMouseUp}
+        >
+          <ContextMenuTrigger id="timer-context-menu" holdToDisplay={-1}>
+            {this.state.run && (
+              <Title
+                gameName={this.state.run.gameName}
+                runCategory={this.state.run.runCategory}
+                options={this.state.layoutOptions.titleOptions}
+              />
+            )}
+            {this.state.run && (
+              <Segments
+                segments={this.state.run.segments}
+                options={this.state.layoutOptions.segmentsOptions}
+              />
+            )}
+            <Timer
+              time={this.state.elapsedTime}
+              options={this.state.layoutOptions.timerOptions}
             />
-          )}
-          {this.state.run && <Segments segments={this.state.run.segments} />}
-          <Timer time={this.state.elapsedTime} />
-        </ContextMenuTrigger>
-
+          </ContextMenuTrigger>
+        </div>
         <ContextMenu id="timer-context-menu">
           <MenuItem onClick={this.openSegmentsEditor}>
             Create New Splits
@@ -82,6 +110,7 @@ class App extends Component<{}, AppState> {
         <Popup
           open={this.state.segmentsEditorOpen}
           closeOnDocumentClick={false}
+          contentStyle={{ width: "initial" }}
         >
           <SegmentsEditor
             onSave={this.onSegmentsEditorSave}
@@ -95,6 +124,37 @@ class App extends Component<{}, AppState> {
   componentWillUnmount = () => {
     clearInterval(this.interval);
     document.removeEventListener("keydown", this.handleKeyDown);
+  };
+
+  private handleMouseDown = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (event.button === 0) {
+      this.dragging = true;
+      this.mouseX = event.pageX;
+      this.mouseY = event.pageY;
+    }
+  };
+
+  private handleMouseMove = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    event.preventDefault();
+    if (event.button === 0 && this.dragging) {
+      var xLocation = event.screenX - this.mouseX;
+      var yLocation = event.screenY - this.mouseY;
+
+      mainWindow.setPosition(xLocation, yLocation);
+    }
+  };
+
+  private handleMouseUp = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (event.button === 0) {
+      this.dragging = false;
+    }
   };
 
   private handleKeyDown = (event: KeyboardEvent) => {
@@ -115,15 +175,22 @@ class App extends Component<{}, AppState> {
   };
 
   private openSegmentsEditor = () => {
+    mainWindow.setSize(500, 500);
     this.setState({ segmentsEditorOpen: true });
   };
 
   private onSegmentsEditorSave = (run: Run) => {
     this.setState({ run, segmentsEditorOpen: false });
+    this.onSegmentsEditorClosed();
   };
 
   private onSegmentsEditorCancel = () => {
     this.setState({ segmentsEditorOpen: false });
+    this.onSegmentsEditorClosed();
+  };
+
+  private onSegmentsEditorClosed = () => {
+    mainWindow.setSize(this.defaultWidth, this.getAppHeight());
   };
 
   private saveSplits = () => {
@@ -166,8 +233,11 @@ class App extends Component<{}, AppState> {
       if (filePaths) {
         const filename = filePaths[0];
         const fileContent = fs.readFileSync(filename);
-        this.setState({ run: this.parseRunFromFile(fileContent) });
-        this.setState({ currentRunFilename: filename });
+        this.setState({
+          currentRunFilename: filename,
+          run: this.parseRunFromFile(fileContent)
+        });
+        mainWindow.setSize(this.defaultWidth, this.getAppHeight());
       }
     });
   };
@@ -194,6 +264,19 @@ class App extends Component<{}, AppState> {
     });
 
     return run;
+  };
+
+  private getAppHeight = () => {
+    let height = this.state.layoutOptions.timerOptions.height;
+
+    if (this.state.run) {
+      height += this.state.layoutOptions.titleOptions.height;
+      height +=
+        this.state.layoutOptions.segmentsOptions.segmentOptions.height *
+        this.state.run.segments.length;
+    }
+
+    return height + this.gapForMenu;
   };
 }
 
