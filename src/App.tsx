@@ -4,7 +4,6 @@ const fs = window.require("fs");
 
 import React, { Component } from "react";
 
-import { Stopwatch } from "ts-stopwatch";
 import { Timer } from "./components/timer";
 import { Title } from "./components/title";
 import { Segments } from "./components/segments";
@@ -15,6 +14,7 @@ import { Segment as SegmentModel } from "./models/segment";
 import { RunDto } from "./models/dtos/runDto";
 import { LayoutOptions } from "./models/options/layoutOptions";
 import { FileDialogFilter } from "./models/fileDialogFilter";
+import { Timer as TimerUtil } from "./utils/timer";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import Popup from "reactjs-popup";
@@ -40,7 +40,7 @@ class App extends Component<{}, AppState> {
   private dragging = false;
   private mouseX = 0;
   private mouseY = 0;
-  private stopwatch = new Stopwatch();
+  private timer = new TimerUtil();
   private interval: NodeJS.Timeout;
   private defaultWidth = 300;
   private gapForMenu = 100;
@@ -48,7 +48,7 @@ class App extends Component<{}, AppState> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      elapsedTime: this.stopwatch.getTime(),
+      elapsedTime: 0,
       state: TimerState.STOPPED,
       segmentsEditorOpen: false,
       layoutOptions: new LayoutOptions()
@@ -159,19 +159,54 @@ class App extends Component<{}, AppState> {
 
   private handleKeyDown = (event: KeyboardEvent) => {
     if (event.keyCode === 32) {
-      this.start();
+      this.handleSplit();
     }
   };
 
   private intervalHandler = () => {
     if (this.state.state === TimerState.RUNNING) {
-      this.setState({ elapsedTime: this.stopwatch.getTime() });
+      this.setState({ elapsedTime: this.timer.getTime() });
+    }
+  };
+
+  private handleSplit = () => {
+    if (this.state.state === TimerState.STOPPED) {
+      this.start();
+    } else if (this.state.state === TimerState.RUNNING) {
+      if (!this.state.run) {
+        this.pause();
+      } else {
+        this.split();
+      }
+    } else if (this.state.state === TimerState.PAUSED) {
+      if (!this.state.run) {
+        this.reset();
+      } else {
+        this.start();
+      }
     }
   };
 
   private start = () => {
-    this.stopwatch.start();
+    this.timer.start();
     this.setState({ state: TimerState.RUNNING });
+  };
+
+  private pause = () => {
+    this.timer.pause();
+    this.setState({ state: TimerState.PAUSED });
+  };
+
+  private split = () => {
+    this.timer.split();
+  };
+
+  private reset = () => {
+    this.timer.reset();
+    this.setState({
+      state: TimerState.STOPPED,
+      elapsedTime: this.timer.getTime()
+    });
   };
 
   private openSegmentsEditor = () => {
