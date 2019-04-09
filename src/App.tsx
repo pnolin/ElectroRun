@@ -53,6 +53,7 @@ class App extends Component<{}, AppState> {
       segmentsEditorOpen: false,
       layoutOptions: new LayoutOptions()
     };
+
     this.intervalHandler = this.intervalHandler.bind(this);
     this.interval = setInterval(this.intervalHandler, 1);
   }
@@ -172,6 +173,9 @@ class App extends Component<{}, AppState> {
   private handleSplit = () => {
     if (this.state.state === TimerState.STOPPED) {
       this.start();
+      if (this.state.run) {
+        this.updateCurrentRunSegmentIndex(0);
+      }
     } else if (this.state.state === TimerState.RUNNING) {
       if (!this.state.run) {
         this.pause();
@@ -184,6 +188,9 @@ class App extends Component<{}, AppState> {
       } else {
         this.start();
       }
+    } else if (this.state.state === TimerState.FINISHED) {
+      this.reset();
+      this.updateCurrentRunSegmentIndex(-1);
     }
   };
 
@@ -198,7 +205,18 @@ class App extends Component<{}, AppState> {
   };
 
   private split = () => {
-    this.timer.split();
+    if (this.state.run) {
+      this.timer.split();
+      this.updateCurrentRunSegmentIndex(this.state.run.currentSegmentIndex + 1);
+      if (
+        this.state.run.currentSegmentIndex === this.state.run.segments.length
+      ) {
+        this.timer.pause();
+        this.setState({ state: TimerState.FINISHED });
+      }
+    } else {
+      throw new Error("Not supposed to call this function without a run!");
+    }
   };
 
   private reset = () => {
@@ -207,6 +225,13 @@ class App extends Component<{}, AppState> {
       state: TimerState.STOPPED,
       elapsedTime: this.timer.getTime()
     });
+  };
+
+  private updateCurrentRunSegmentIndex = (currentSegmentIndex: number) => {
+    const currentRun = this.state.run!;
+    const newRun = currentRun.clone();
+    newRun.currentSegmentIndex = currentSegmentIndex;
+    this.setState({ run: newRun });
   };
 
   private openSegmentsEditor = () => {
