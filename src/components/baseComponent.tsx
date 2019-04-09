@@ -17,6 +17,7 @@ export class BaseComponent<
   protected getStyle = () => {
     return {
       height: this.props.options.height,
+      backgroundColor: this.props.options.backgroundColor,
       color: this.props.options.textColor
     };
   };

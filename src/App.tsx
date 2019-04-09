@@ -87,6 +87,7 @@ class App extends Component<{}, AppState> {
               <Segments
                 segments={this.state.run.segments}
                 options={this.state.layoutOptions.segmentsOptions}
+                currentSegmentIndex={this.state.run.currentSegmentIndex}
               />
             )}
             <Timer
