@@ -232,7 +232,23 @@ class App extends Component<{}, AppState> {
     const currentRun = this.state.run!;
     const newRun = currentRun.clone();
     newRun.currentSegmentIndex = currentSegmentIndex;
+    newRun.segments = this.createSegments(newRun);
     this.setState({ run: newRun });
+  };
+
+  private createSegments = (run: Run) => {
+    const splits = this.timer.getSplits();
+
+    return run.segments.map((segment, index) => {
+      if (index < splits.length) {
+        const newSegment = segment.clone();
+        newSegment.splitTime = splits[index].endTime;
+
+        return newSegment;
+      }
+
+      return segment;
+    });
   };
 
   private openSegmentsEditor = () => {
