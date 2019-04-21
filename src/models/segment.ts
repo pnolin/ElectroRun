@@ -6,4 +6,12 @@ export class Segment {
     this.name = "";
     this.splitTime = undefined;
   }
+
+  public clone = () => {
+    const segment = new Segment();
+    segment.name = this.name;
+    segment.splitTime = this.splitTime;
+
+    return segment;
+  };
 }

@@ -2,10 +2,13 @@ import React from "react";
 
 import { BaseComponent, BaseComponentProps } from "./baseComponent";
 import { Segment as SegmentModel } from "../models/segment";
+import { SegmentOptions } from "../models/options/segmentOptions";
 import { elapsedTimeToString } from "../utils/timeFormat";
 
 interface SegmentProps extends BaseComponentProps {
   segment: SegmentModel;
+  options: SegmentOptions;
+  isCurrentSegment: boolean;
 }
 
 export class Segment extends BaseComponent<SegmentProps, {}> {
@@ -14,7 +17,7 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
   }
 
   public render = () => {
-    const style = this.getStyle();
+    const style = this.getMyStyle();
     return (
       <div className="segment" style={style}>
         <span>{`${this.props.segment.name}`}</span>
@@ -25,6 +28,15 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
         }`}</span>
       </div>
     );
+  };
+
+  public getMyStyle = () => {
+    const style = this.getStyle();
+    style.backgroundColor = this.props.isCurrentSegment
+      ? this.props.options.currentSegmentBackgroundColor
+      : style.backgroundColor;
+
+    return style;
   };
 }
 

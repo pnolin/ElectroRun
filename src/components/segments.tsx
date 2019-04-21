@@ -10,6 +10,7 @@ import "../styles/segment.css";
 interface SegmentsProps extends BaseComponentProps {
   segments: SegmentModel[];
   options: SegmentsOptions;
+  currentSegmentIndex: number;
 }
 
 export class Segments extends BaseComponent<SegmentsProps, {}> {
@@ -23,6 +24,7 @@ export class Segments extends BaseComponent<SegmentsProps, {}> {
         segment={segment}
         key={index}
         options={this.props.options.segmentOptions}
+        isCurrentSegment={this.props.currentSegmentIndex === index}
       />
     ));
 
