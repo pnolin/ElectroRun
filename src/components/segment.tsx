@@ -1,29 +1,31 @@
 import React from "react";
 
+import { BaseComponent, BaseComponentProps } from "./baseComponent";
 import { Segment as SegmentModel } from "../models/segment";
 import { elapsedTimeToString } from "../utils/timeFormat";
-import { SegmentOptions } from "../models/options/segmentOptions";
 
-type SegmentProps = {
+interface SegmentProps extends BaseComponentProps {
   segment: SegmentModel;
-  options: SegmentOptions;
-};
+}
 
-const Segment = (props: SegmentProps) => {
-  const style = {
-    height: props.options.height,
-    color: props.options.textColor
+export class Segment extends BaseComponent<SegmentProps, {}> {
+  constructor(props: SegmentProps) {
+    super(props);
+  }
+
+  public render = () => {
+    const style = this.getStyle();
+    return (
+      <div className="segment" style={style}>
+        <span>{`${this.props.segment.name}`}</span>
+        <span>{`${
+          this.props.segment.splitTime
+            ? elapsedTimeToString(this.props.segment.splitTime)
+            : "-"
+        }`}</span>
+      </div>
+    );
   };
-  return (
-    <div className="segment" style={style}>
-      <span>{`${props.segment.name}`}</span>
-      <span>{`${
-        props.segment.splitTime
-          ? elapsedTimeToString(props.segment.splitTime)
-          : "-"
-      }`}</span>
-    </div>
-  );
-};
+}
 
 export default Segment;

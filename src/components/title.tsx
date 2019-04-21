@@ -1,26 +1,28 @@
 import React from "react";
 
-import { TitleOptions } from "../models/options/titleOptions";
+import { BaseComponent, BaseComponentProps } from "./baseComponent";
 
 import "../styles/title.css";
 
-type TitleProps = {
+interface TitleProps extends BaseComponentProps {
   gameName: string;
   runCategory: string;
-  options: TitleOptions;
-};
+}
 
-export const Title = (props: TitleProps) => {
-  const style = {
-    height: props.options.height,
-    color: props.options.textColor
+export class Title extends BaseComponent<TitleProps, {}> {
+  constructor(props: TitleProps) {
+    super(props);
+  }
+
+  public render = () => {
+    const style = this.getStyle();
+
+    return (
+      <div id="title" style={style}>
+        <div>{this.props.gameName}</div>
+        <div id="title-separator">{`-`}</div>
+        <div>{this.props.runCategory}</div>
+      </div>
+    );
   };
-
-  return (
-    <div id="title" style={style}>
-      <div>{props.gameName}</div>
-      <div id="title-separator">{`-`}</div>
-      <div>{props.runCategory}</div>
-    </div>
-  );
-};
+}
