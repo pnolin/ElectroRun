@@ -26,7 +26,8 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
             Math.abs(
               this.props.segment.splitTime -
                 this.props.comparedAgainst.splitTime
-            )
+            ),
+            this.props.options.timeFormatOptions!
           )
         : null;
     const deltaSpan = <span>{delta && this.props.splitted ? delta : ""}</span>;
@@ -38,7 +39,10 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
           {deltaSpan}
           <span>{`${
             this.props.segment.splitTime
-              ? elapsedTimeToString(this.props.segment.splitTime)
+              ? elapsedTimeToString(
+                  this.props.segment.splitTime,
+                  this.props.options.timeFormatOptions!
+                )
               : "-"
           }`}</span>
         </div>
