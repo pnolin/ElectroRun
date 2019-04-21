@@ -9,6 +9,7 @@ import "../styles/segment.css";
 
 interface SegmentsProps extends BaseComponentProps {
   segments: SegmentModel[];
+  comparedSegemnts: SegmentModel[];
   options: SegmentsOptions;
   currentSegmentIndex: number;
 }
@@ -22,9 +23,11 @@ export class Segments extends BaseComponent<SegmentsProps, {}> {
     const segments = this.props.segments.map((segment, index) => (
       <Segment
         segment={segment}
+        comparedAgainst={this.props.comparedSegemnts[index]}
         key={index}
         options={this.props.options.segmentOptions}
         isCurrentSegment={this.props.currentSegmentIndex === index}
+        splitted={this.props.currentSegmentIndex > index}
       />
     ));
 

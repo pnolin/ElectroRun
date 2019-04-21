@@ -7,8 +7,10 @@ import { elapsedTimeToString } from "../utils/timeFormat";
 
 interface SegmentProps extends BaseComponentProps {
   segment: SegmentModel;
+  comparedAgainst: SegmentModel;
   options: SegmentOptions;
   isCurrentSegment: boolean;
+  splitted: boolean;
 }
 
 export class Segment extends BaseComponent<SegmentProps, {}> {
@@ -18,14 +20,28 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
 
   public render = () => {
     const style = this.getMyStyle();
+    const delta =
+      this.props.segment.splitTime && this.props.comparedAgainst.splitTime
+        ? elapsedTimeToString(
+            Math.abs(
+              this.props.segment.splitTime -
+                this.props.comparedAgainst.splitTime
+            )
+          )
+        : null;
+    const deltaSpan = <span>{delta && this.props.splitted ? delta : ""}</span>;
+
     return (
       <div className="segment" style={style}>
-        <span>{`${this.props.segment.name}`}</span>
-        <span>{`${
-          this.props.segment.splitTime
-            ? elapsedTimeToString(this.props.segment.splitTime)
-            : "-"
-        }`}</span>
+        <div>{`${this.props.segment.name}`}</div>
+        <div id="segment-times">
+          {deltaSpan}
+          <span>{`${
+            this.props.segment.splitTime
+              ? elapsedTimeToString(this.props.segment.splitTime)
+              : "-"
+          }`}</span>
+        </div>
       </div>
     );
   };
