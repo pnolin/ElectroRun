@@ -37,6 +37,7 @@ type AppState = {
 };
 
 class App extends Component<{}, AppState> {
+  private currentComparison?: Run;
   private dragging = false;
   private mouseX = 0;
   private mouseY = 0;
@@ -86,6 +87,7 @@ class App extends Component<{}, AppState> {
             {this.state.run && (
               <Segments
                 segments={this.state.run.segments}
+                comparedSegemnts={this.currentComparison!.segments}
                 options={this.state.layoutOptions.segmentsOptions}
                 currentSegmentIndex={this.state.run.currentSegmentIndex}
               />
@@ -257,6 +259,7 @@ class App extends Component<{}, AppState> {
   };
 
   private onSegmentsEditorSave = (run: Run) => {
+    this.currentComparison = run.clone();
     this.setState({ run, segmentsEditorOpen: false });
     this.onSegmentsEditorClosed();
   };
@@ -310,6 +313,7 @@ class App extends Component<{}, AppState> {
       if (filePaths) {
         const filename = filePaths[0];
         const fileContent = fs.readFileSync(filename);
+        this.currentComparison = this.parseRunFromFile(fileContent);
         this.setState({
           currentRunFilename: filename,
           run: this.parseRunFromFile(fileContent)

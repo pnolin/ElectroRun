@@ -19,7 +19,10 @@ export class Timer extends BaseComponent<TimerProps, {}> {
 
     return (
       <div id="timer" style={style}>
-        {elapsedTimeToString(this.props.time)}
+        {elapsedTimeToString(
+          this.props.time,
+          this.props.options.timeFormatOptions!
+        )}
       </div>
     );
   };

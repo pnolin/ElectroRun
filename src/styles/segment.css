@@ -6,3 +6,13 @@
 
   padding: 0px 5px;
 }
+
+.segment > div {
+  flex: 1;
+}
+
+.segment #segment-times {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}

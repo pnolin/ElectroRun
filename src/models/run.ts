@@ -16,7 +16,7 @@ export class Run {
   public clone = () => {
     const run = new Run();
     run.gameName = this.gameName;
-    run.runCategory = this.gameName;
+    run.runCategory = this.runCategory;
     run.segments = this.segments.map(segment => segment.clone());
     run.currentSegmentIndex = this.currentSegmentIndex;
 

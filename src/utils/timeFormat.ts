@@ -1,4 +1,10 @@
-const elapsedTimeToString = (time: number) => {
+import { TimeFormatOptions } from "../models/options/timeFormatOptions";
+import { DecimalPlaces } from "../models/options/decimalPlaces";
+
+const elapsedTimeToString = (
+  time: number,
+  formatOptions: TimeFormatOptions
+) => {
   const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((time / (1000 * 60)) % 60);
   const seconds = Math.floor((time / 1000) % 60);
@@ -8,13 +14,52 @@ const elapsedTimeToString = (time: number) => {
   const secondsText = seconds < 10 ? `0${seconds}` : `${seconds}`;
   const minutesText = minutes < 10 ? `0${minutes}` : `${minutes}`;
 
+  let toReturn: string;
+
   if (totalSeconds < 60) {
-    return `${seconds}.${remaining}`;
+    toReturn = `${seconds}`;
   } else if (totalSeconds < 3600) {
-    return `${minutes}:${secondsText}.${remaining}`;
+    toReturn = `${minutes}:${secondsText}`;
+  } else {
+    toReturn = `${hours}:${minutesText}:${secondsText}`;
   }
 
-  return `${hours}:${minutesText}:${secondsText}.${remaining}`;
+  return toReturn.concat(
+    getRemaingString(remaining, formatOptions.decimalPlaces)
+  );
+};
+
+const getRemaingString = (remaining: number, decimalPlaces: DecimalPlaces) => {
+  const dividedByTen = Math.floor(remaining / 10);
+  const dividedByHundred = Math.floor(remaining / 100);
+
+  if (decimalPlaces === DecimalPlaces.NONE) {
+    return "";
+  } else if (decimalPlaces === DecimalPlaces.TENTH) {
+    if (remaining >= 0 && remaining < 10) {
+      return `.${remaining}`;
+    } else if (remaining >= 10 && remaining < 100) {
+      return `.${dividedByTen}`;
+    } else {
+      return `.${dividedByHundred}`;
+    }
+  } else if (decimalPlaces === DecimalPlaces.HUNDREDTH) {
+    if (remaining >= 0 && remaining < 10) {
+      return `.${remaining}0`;
+    } else if (remaining >= 10 && remaining < 100) {
+      return `.${remaining}`;
+    } else {
+      return `.${dividedByTen}`;
+    }
+  } else {
+    if (remaining >= 0 && remaining < 10) {
+      return `.${remaining}00`;
+    } else if (remaining >= 10 && remaining < 100) {
+      return `.${remaining}0`;
+    } else {
+      return `.${remaining}`;
+    }
+  }
 };
 
 const stringToElapsedTime = (textValue: string) => {
