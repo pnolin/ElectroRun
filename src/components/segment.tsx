@@ -20,6 +20,14 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
 
   public render = () => {
     const style = this.getMyStyle();
+
+    const ahead =
+      this.props.segment.splitTime && this.props.comparedAgainst.splitTime
+        ? this.props.segment.splitTime <= this.props.comparedAgainst.splitTime
+        : null;
+
+    const sign = ahead !== null ? (ahead ? "-" : "+") : "";
+    const deltaStyle = ahead !== null ? this.getDeltaStyle(ahead) : {};
     const delta =
       this.props.segment.splitTime && this.props.comparedAgainst.splitTime
         ? elapsedTimeToString(
@@ -30,7 +38,12 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
             this.props.options.timeFormatOptions!
           )
         : null;
-    const deltaSpan = <span>{delta && this.props.splitted ? delta : ""}</span>;
+
+    const deltaSpan = (
+      <span style={deltaStyle}>
+        {delta && this.props.splitted ? `${sign}${delta}` : ""}
+      </span>
+    );
 
     return (
       <div className="segment" style={style}>
@@ -57,6 +70,18 @@ export class Segment extends BaseComponent<SegmentProps, {}> {
       : style.backgroundColor;
 
     return style;
+  };
+
+  public getDeltaStyle = (ahead: boolean) => {
+    if (ahead) {
+      return {
+        color: this.props.options.deltaColorOptions.aheadSavedTime
+      };
+    }
+
+    return {
+      color: this.props.options.deltaColorOptions.behindLostTime
+    };
   };
 }
 
