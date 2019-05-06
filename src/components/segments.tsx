@@ -9,6 +9,7 @@ import { UnsplittedSegment } from "./unsplittedSegment";
 import "../styles/segment.css";
 
 interface SegmentsProps extends BaseComponentProps {
+  currentRunTime: number;
   runSegments: SegmentModel[];
   comparedSegments: SegmentModel[];
   options: SegmentsOptions;
@@ -36,6 +37,7 @@ export class Segments extends BaseComponent<SegmentsProps, {}> {
         return (
           <UnsplittedSegment
             key={index}
+            currentRunTime={this.props.currentRunTime}
             comparedAgainst={segment}
             options={this.props.options.segmentOptions}
             isCurrentSegment={this.props.currentSegmentIndex === index}

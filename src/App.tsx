@@ -87,6 +87,7 @@ class App extends Component<{}, AppState> {
             )}
             {this.state.currentComparison && (
               <Segments
+                currentRunTime={this.state.elapsedTime}
                 runSegments={this.state.currentRun.segments}
                 comparedSegments={this.state.currentComparison!.segments}
                 options={this.state.layoutOptions.segmentsOptions}

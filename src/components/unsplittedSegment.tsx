@@ -6,6 +6,7 @@ import { SegmentOptions } from "../models/options/segmentOptions";
 import { elapsedTimeToString } from "../utils/timeFormat";
 
 interface SegmentProps extends BaseComponentProps {
+  currentRunTime: number;
   comparedAgainst: SegmentModel;
   options: SegmentOptions;
   isCurrentSegment: boolean;
@@ -19,13 +20,32 @@ export class UnsplittedSegment extends BaseComponent<SegmentProps, {}> {
   public render = () => {
     const style = this.getMyStyle();
 
+    const delta =
+      this.props.comparedAgainst.splitTime !== undefined
+        ? this.props.currentRunTime - this.props.comparedAgainst.splitTime
+        : undefined;
+
+    const deltaSpan =
+      delta !== undefined && delta > 0 ? (
+        <span
+          style={{ color: this.props.options.deltaColorOptions.behindLostTime }}
+        >
+          {`+${elapsedTimeToString(
+            delta,
+            this.props.options.timeFormatOptions!
+          )}`}
+        </span>
+      ) : (
+        <span />
+      );
+
     return (
       <div className="segment" style={style}>
         <div>{`${this.props.comparedAgainst.name}`}</div>
         <div id="segment-times">
-          <span id="on-going-delta" />
+          {deltaSpan}
           <span>{`${
-            this.props.comparedAgainst.splitTime
+            this.props.comparedAgainst.splitTime !== undefined
               ? elapsedTimeToString(
                   this.props.comparedAgainst.splitTime,
                   this.props.options.timeFormatOptions!

@@ -21,10 +21,11 @@ export class SplittedSegment extends BaseComponent<SegmentProps, {}> {
   constructor(props: SegmentProps) {
     super(props);
 
-    this.delta = this.props.comparedAgainst.splitTime
-      ? this.props.splittedSegment.splitTime! -
-        this.props.comparedAgainst.splitTime
-      : null;
+    this.delta =
+      this.props.comparedAgainst.splitTime !== undefined
+        ? this.props.splittedSegment.splitTime! -
+          this.props.comparedAgainst.splitTime
+        : null;
 
     this.ahead = this.delta !== null && this.delta <= 0;
     this.sign = this.ahead ? "-" : "+";
