@@ -31,13 +31,13 @@ type AppState = {
   elapsedTime: number;
   state: TimerState;
   segmentsEditorOpen: boolean;
-  run?: Run;
+  currentComparison?: Run;
+  currentRun: Run;
   layoutOptions: LayoutOptions;
   currentRunFilename?: string;
 };
 
 class App extends Component<{}, AppState> {
-  private currentComparison?: Run;
   private dragging = false;
   private mouseX = 0;
   private mouseY = 0;
@@ -49,6 +49,7 @@ class App extends Component<{}, AppState> {
   constructor(props: {}) {
     super(props);
     this.state = {
+      currentRun: new Run(),
       elapsedTime: 0,
       state: TimerState.STOPPED,
       segmentsEditorOpen: false,
@@ -77,19 +78,20 @@ class App extends Component<{}, AppState> {
           onMouseLeave={this.handleMouseUp}
         >
           <ContextMenuTrigger id="timer-context-menu" holdToDisplay={-1}>
-            {this.state.run && (
+            {this.state.currentComparison && (
               <Title
-                gameName={this.state.run.gameName}
-                runCategory={this.state.run.runCategory}
+                gameName={this.state.currentComparison.gameName}
+                runCategory={this.state.currentComparison.runCategory}
                 options={this.state.layoutOptions.titleOptions}
               />
             )}
-            {this.state.run && (
+            {this.state.currentComparison && (
               <Segments
-                segments={this.state.run.segments}
-                comparedSegemnts={this.currentComparison!.segments}
+                currentRunTime={this.state.elapsedTime}
+                runSegments={this.state.currentRun.segments}
+                comparedSegments={this.state.currentComparison!.segments}
                 options={this.state.layoutOptions.segmentsOptions}
-                currentSegmentIndex={this.state.run.currentSegmentIndex}
+                currentSegmentIndex={this.state.currentRun.currentSegmentIndex}
               />
             )}
             <Timer
@@ -102,10 +104,16 @@ class App extends Component<{}, AppState> {
           <MenuItem onClick={this.openSegmentsEditor}>
             Create New Splits
           </MenuItem>
-          <MenuItem onClick={this.saveSplits} disabled={!this.state.run}>
+          <MenuItem
+            onClick={this.saveSplits}
+            disabled={!this.state.currentComparison}
+          >
             Save Splits
           </MenuItem>
-          <MenuItem onClick={this.saveSplitsAs} disabled={!this.state.run}>
+          <MenuItem
+            onClick={this.saveSplitsAs}
+            disabled={!this.state.currentComparison}
+          >
             Save Splits As
           </MenuItem>
           <MenuItem onClick={this.loadSplits}>Load Splits</MenuItem>
@@ -176,17 +184,17 @@ class App extends Component<{}, AppState> {
   private handleSplit = () => {
     if (this.state.state === TimerState.STOPPED) {
       this.start();
-      if (this.state.run) {
+      if (this.state.currentComparison) {
         this.updateCurrentRunSegmentIndex(0);
       }
     } else if (this.state.state === TimerState.RUNNING) {
-      if (!this.state.run) {
+      if (!this.state.currentComparison) {
         this.pause();
       } else {
         this.split();
       }
     } else if (this.state.state === TimerState.PAUSED) {
-      if (!this.state.run) {
+      if (!this.state.currentComparison) {
         this.reset();
       } else {
         this.start();
@@ -208,11 +216,14 @@ class App extends Component<{}, AppState> {
   };
 
   private split = () => {
-    if (this.state.run) {
+    if (this.state.currentComparison) {
       this.timer.split();
-      this.updateCurrentRunSegmentIndex(this.state.run.currentSegmentIndex + 1);
+      this.updateCurrentRunSegmentIndex(
+        this.state.currentRun.currentSegmentIndex + 1
+      );
       if (
-        this.state.run.currentSegmentIndex === this.state.run.segments.length
+        this.state.currentRun.currentSegmentIndex ===
+        this.state.currentRun.segments.length
       ) {
         this.timer.pause();
         this.setState({ state: TimerState.FINISHED });
@@ -231,11 +242,11 @@ class App extends Component<{}, AppState> {
   };
 
   private updateCurrentRunSegmentIndex = (currentSegmentIndex: number) => {
-    const currentRun = this.state.run!;
+    const currentRun = this.state.currentRun;
     const newRun = currentRun.clone();
     newRun.currentSegmentIndex = currentSegmentIndex;
     newRun.segments = this.createSegments(newRun);
-    this.setState({ run: newRun });
+    this.setState({ currentRun: newRun });
   };
 
   private createSegments = (run: Run) => {
@@ -259,8 +270,14 @@ class App extends Component<{}, AppState> {
   };
 
   private onSegmentsEditorSave = (run: Run) => {
-    this.currentComparison = run.clone();
-    this.setState({ run, segmentsEditorOpen: false });
+    const currentRun = run.clone();
+    currentRun.segments.forEach(segment => (segment.splitTime = undefined));
+
+    this.setState({
+      currentComparison: run.clone(),
+      currentRun,
+      segmentsEditorOpen: false
+    });
     this.onSegmentsEditorClosed();
   };
 
@@ -299,7 +316,11 @@ class App extends Component<{}, AppState> {
   };
 
   private saveSplitsToFile = (filename: string) => {
-    fs.writeFileSync(filename, JSON.stringify(this.state.run), null);
+    fs.writeFileSync(
+      filename,
+      JSON.stringify(this.state.currentComparison),
+      null
+    );
   };
 
   private loadSplits = () => {
@@ -313,10 +334,14 @@ class App extends Component<{}, AppState> {
       if (filePaths) {
         const filename = filePaths[0];
         const fileContent = fs.readFileSync(filename);
-        this.currentComparison = this.parseRunFromFile(fileContent);
+        const loadedRun = this.parseRunFromFile(fileContent);
+        const currentRun = loadedRun.clone();
+        currentRun.segments.forEach(segment => (segment.splitTime = undefined));
+
         this.setState({
           currentRunFilename: filename,
-          run: this.parseRunFromFile(fileContent)
+          currentComparison: loadedRun,
+          currentRun
         });
         mainWindow.setSize(this.defaultWidth, this.getAppHeight());
       }
@@ -350,11 +375,11 @@ class App extends Component<{}, AppState> {
   private getAppHeight = () => {
     let height = this.state.layoutOptions.timerOptions.height;
 
-    if (this.state.run) {
+    if (this.state.currentComparison) {
       height += this.state.layoutOptions.titleOptions.height;
       height +=
         this.state.layoutOptions.segmentsOptions.segmentOptions.height *
-        this.state.run.segments.length;
+        this.state.currentComparison.segments.length;
     }
 
     return height + this.gapForMenu;
